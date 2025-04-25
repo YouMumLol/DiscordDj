@@ -1,0 +1,35 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      # Add your Discord bot token here or use a .env file
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    # Add Windows-specific configurations
+    platform: linux/amd64
+    # Add healthcheck
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('Bot is running')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Add watch configuration
+    develop:
+      watch:
+        - path: ./src
+          action: sync
+          target: /app/src
+        - path: ./index.js
+          action: sync
+          target: /app/index.js
+        - path: ./package.json
+          action: sync+restart
+          target: /app/package.json
