@@ -1,33 +1,22 @@
-# Use Node.js LTS as the base image
-FROM node:20-slim
+# Use the official Node.js image as a base
+FROM node:18-buster
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    libopus-dev \
-    libsodium-dev \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
+# Install ffmpeg and opus
+RUN apt-get update && \
+    apt-get install -y ffmpeg libopus-dev && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install pnpm globally
-RUN npm install -g pnpm
-
-# Create app directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml* ./
+# Copy package.json and package-lock.json for npm installation
+COPY package*.json ./
 
-# Install dependencies
-RUN pnpm install
+# Install dependencies including dev dependencies
+RUN npm install
 
-# Copy source code
+# Copy the rest of your project files into the container
 COPY . .
 
-# Set environment variables
-ENV NODE_ENV=development
-
-# Command to run the bot with nodemon
-CMD ["pnpm", "run", "dev"] 
+# Command to run in development
+CMD ["npm", "run", "dev"]
